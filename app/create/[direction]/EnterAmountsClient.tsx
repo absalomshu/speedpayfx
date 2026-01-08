@@ -127,12 +127,6 @@ export default function EnterAmountsClient({ direction }: Props) {
 
   return (
     <main className="mx-auto flex max-w-xl flex-col gap-5 px-5 py-8">
-      <div className="flex items-center gap-2 text-sm text-midnight/70">
-        <Link href="/create" className="font-semibold text-midnight">Back</Link>
-        <span className="text-midnight/40">/</span>
-        <span>{meta.title}</span>
-      </div>
-
       <header className="flex flex-col gap-2">
         <p className="text-sm font-semibold uppercase tracking-widest text-midnight/60">Enter Amounts</p>
         <h1 className="text-2xl font-black text-midnight">{meta.title}</h1>

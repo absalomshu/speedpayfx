@@ -2,9 +2,3 @@ name = "fx-orders"
 compatibility_date = "2024-01-08"
 compatibility_flags = ["nodejs_compat"]
 pages_build_output_dir = ".vercel/output/static"
-
-# Replace ids with real namespace ids after running wrangler commands below.
-[[kv_namespaces]]
-binding = "FX_KV"
-id = "REPLACE_WITH_PRODUCTION_ID"
-preview_id = "REPLACE_WITH_PREVIEW_ID"

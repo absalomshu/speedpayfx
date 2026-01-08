@@ -2,3 +2,8 @@ name = "fx-orders"
 compatibility_date = "2024-01-08"
 compatibility_flags = ["nodejs_compat"]
 pages_build_output_dir = ".vercel/output/static"
+
+[[kv_namespaces]]
+binding = "FX_KV"
+id = "07113ec3cadb41ada999033818e90c83"
+preview_id = "07113ec3cadb41ada999033818e90c83"

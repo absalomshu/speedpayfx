@@ -11,8 +11,8 @@ export default async function HomePage() {
   return (
     <main className="mx-auto flex max-w-xl flex-col gap-6 px-5 py-8">
       <header className="flex flex-col gap-2">
-        <h1 className="text-3xl font-black leading-tight text-midnight">Match USD and XAF in seconds</h1>
-        <p className="text-base text-midnight/70">Peer matching for USD and XAF trades. Transparent rates, fast confirmations.</p>
+        <h1 className="text-3xl font-black leading-tight text-midnight">USD and XAF Exchange</h1>
+        <p className="text-base text-midnight/70">Peer matching for USD and XAF trades.</p>
       </header>
 
       <section className="card p-5">
@@ -37,7 +37,7 @@ export default async function HomePage() {
 
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
         <Link href="/create" className="btn text-center text-lg">Create Order</Link>
-        <Link href="/orders" className="btn bg-white text-midnight ring-1 ring-midnight/15 hover:bg-sand">Browse Orders</Link>
+        <Link href="/orders" className="btn text-center text-lg">Browse Orders</Link>
       </div>
     </main>
   );

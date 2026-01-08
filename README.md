@@ -1,0 +1,61 @@
+# FX Orders
+
+Mobile-first Next.js app for matching USD ↔ XAF exchange orders. Persistence uses Cloudflare KV (binding `FX_KV`) and runs on Cloudflare Pages + Pages Functions via `@cloudflare/next-on-pages`.
+
+## Stack
+- Next.js (App Router) + TypeScript
+- Tailwind CSS
+- Cloudflare KV for storage
+- Cloudflare Pages deployment (Wrangler)
+
+## Environment
+- `ADMIN_PASSWORD` (required for POST /api/rates, admin export/import)
+- `NEXT_PUBLIC_SITE_URL` (optional base URL for server-side fetches; falls back to `CF_PAGES_URL`, `VERCEL_URL`, or `http://127.0.0.1:3000`)
+
+## Cloudflare setup
+1) Create KV namespaces (prod + preview):
+```
+npx wrangler kv:namespace create FX_KV
+npx wrangler kv:namespace create FX_KV --preview
+```
+Copy the ids into `wrangler.toml` (`id` and `preview_id`).
+
+2) Set admin password secret for the Pages project:
+```
+npx wrangler pages secret put ADMIN_PASSWORD --project-name fx-orders
+```
+(or set via Cloudflare dashboard → Pages → your project → Settings → Environment variables.)
+
+3) Build the app and generate Pages output:
+```
+npm install
+npm run cf:build
+```
+
+4) Run locally with Pages emulator (uses the preview KV id and binds ADMIN_PASSWORD):
+```
+npx wrangler pages dev .vercel/output/static \
+  --kv FX_KV=<PREVIEW_NAMESPACE_ID> \
+  --binding ADMIN_PASSWORD=<your-password>
+```
+
+5) Deploy to Cloudflare Pages:
+```
+# first deployment will prompt to create/choose a Pages project
+npm run cf:build
+npx wrangler pages deploy .vercel/output/static --project-name fx-orders
+```
+
+## API quick reference
+- `GET /api/rates` – returns rates (creates defaults if missing)
+- `POST /api/rates` – update rates (body: `{ usd_to_xaf, xaf_to_usd, password }`)
+- `POST /api/orders` – create order
+- `GET /api/orders` – list OPEN orders (newest first)
+- `GET /api/orders/:id` – fetch one order
+- `POST /api/orders/:id/match` – mark status MATCHED
+- `GET /api/admin/export` – admin-only JSON export (header `x-admin-password`)
+- `POST /api/admin/import` – admin-only import from the same JSON format
+
+## Notes
+- Data is stored as JSON in KV keys: `rates`, `orders:index`, and `order:{id}` per order.
+- Design is mobile-first with simple cards and large tap targets.

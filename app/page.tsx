@@ -11,7 +11,6 @@ export default async function HomePage() {
   return (
     <main className="mx-auto flex max-w-xl flex-col gap-6 px-5 py-8">
       <header className="flex flex-col gap-2">
-        <p className="text-sm font-semibold uppercase tracking-widest text-midnight/60">FX Orders</p>
         <h1 className="text-3xl font-black leading-tight text-midnight">Match USD and XAF in seconds</h1>
         <p className="text-base text-midnight/70">Peer matching for USD and XAF trades. Transparent rates, fast confirmations.</p>
       </header>
@@ -28,7 +27,7 @@ export default async function HomePage() {
           </div>
           <div className="flex flex-col gap-1">
             <p className="text-sm font-semibold uppercase tracking-wide text-midnight/60">XAF to USD</p>
-            <p className="text-2xl font-black text-midnight">1 USD = {rates.xaf_to_usd} XAF</p>
+            <p className="text-2xl font-black text-midnight">{rates.xaf_to_usd} XAF = 1 USD </p>
           </div>
         </div>
         <p className="mt-3 text-xs font-medium uppercase tracking-wide text-midnight/60">

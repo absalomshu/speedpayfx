@@ -46,6 +46,16 @@ npm run cf:build
 npx wrangler pages deploy .vercel/output/static --project-name fx-orders
 ```
 
+## Local + Cloudflare workflow
+1) Run local tests/builds.
+2) Push to Git (Cloudflare deploys automatically).
+3) Start/keep the local server running for local testing:
+```
+npx wrangler pages dev .vercel/output/static \
+  --binding ADMIN_PASSWORD=<your-password> \
+  --persist-to .wrangler/state
+```
+
 ## API quick reference
 - `GET /api/rates` – returns rates (creates defaults if missing)
 - `POST /api/rates` – update rates (body: `{ usd_to_xaf, xaf_to_usd, password }`)

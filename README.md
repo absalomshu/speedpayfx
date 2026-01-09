@@ -1,4 +1,4 @@
-# FX Orders
+# SpeedpayFX
 
 Mobile-first Next.js app for matching USD ↔ XAF exchange orders. Persistence uses Cloudflare KV (binding `FX_KV`) and runs on Cloudflare Pages + Pages Functions via `@cloudflare/next-on-pages`.
 
@@ -22,7 +22,7 @@ npx wrangler kv:namespace create FX_KV --preview
 
 2) Set admin password secret for the Pages project:
 ```
-npx wrangler pages secret put ADMIN_PASSWORD --project-name fx-orders
+npx wrangler pages secret put ADMIN_PASSWORD --project-name speedpayfx
 ```
 (or set via Cloudflare dashboard → Pages → your project → Settings → Environment variables.)
 
@@ -43,14 +43,15 @@ npx wrangler pages dev .vercel/output/static \
 ```
 # first deployment will prompt to create/choose a Pages project
 npm run cf:build
-npx wrangler pages deploy .vercel/output/static --project-name fx-orders
+npx wrangler pages deploy .vercel/output/static --project-name speedpayfx
 ```
 
 ## Local + Cloudflare workflow
 1) Run local tests/builds.
 2) Push to Git (Cloudflare deploys automatically).
-3) Start/keep the local server running for local testing:
+3) After every push, rebuild and restart the local server so local stays in sync:
 ```
+npm run cf:build
 npx wrangler pages dev .vercel/output/static \
   --binding ADMIN_PASSWORD=<your-password> \
   --persist-to .wrangler/state

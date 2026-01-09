@@ -7,7 +7,7 @@ import { BackButtonBar } from '../components/BackButtonBar';
 const spaceGrotesk = Space_Grotesk({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
-  title: 'FX Orders',
+  title: 'SpeedpayFX',
   description: 'Match USD and XAF exchange orders quickly.',
 };
 

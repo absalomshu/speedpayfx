@@ -9,11 +9,26 @@ export function HeaderBar() {
             FX Orders
           </Link>
         </div>
-        <nav className="flex items-center gap-3 text-sm font-semibold text-midnight/80">
-          <Link href="/create" className="rounded-full px-3 py-1 hover:bg-midnight/5">
+        <nav className="flex items-center gap-2 text-sm font-semibold text-midnight/80">
+          <Link href="/create" className="inline-flex items-center gap-2 rounded-full px-3 py-1 hover:bg-midnight/5">
+            <svg aria-hidden="true" viewBox="0 0 20 20" className="h-4 w-4 text-midnight/70">
+              <path
+                fill="currentColor"
+                d="M10 4.5a.75.75 0 0 1 .75.75v3.75h3.75a.75.75 0 0 1 0 1.5h-3.75v3.75a.75.75 0 0 1-1.5 0v-3.75H5.5a.75.75 0 0 1 0-1.5h3.75V5.25A.75.75 0 0 1 10 4.5Z"
+              />
+            </svg>
             Create
           </Link>
-          <Link href="/orders" className="rounded-full px-3 py-1 hover:bg-midnight/5">
+          <Link
+            href="/orders"
+            className="inline-flex items-center gap-2 rounded-full bg-midnight px-3 py-1 text-sand shadow-sm shadow-midnight/20 transition hover:-translate-y-0.5 hover:bg-midnight/90"
+          >
+            <svg aria-hidden="true" viewBox="0 0 20 20" className="h-4 w-4 text-sand">
+              <path
+                fill="currentColor"
+                d="M5.25 5.75A.75.75 0 0 1 6 5h8a.75.75 0 0 1 0 1.5H6a.75.75 0 0 1-.75-.75Zm0 4A.75.75 0 0 1 6 9h8a.75.75 0 0 1 0 1.5H6a.75.75 0 0 1-.75-.75Zm0 4A.75.75 0 0 1 6 13h5a.75.75 0 0 1 0 1.5H6a.75.75 0 0 1-.75-.75Z"
+              />
+            </svg>
             Orders
           </Link>
         </nav>

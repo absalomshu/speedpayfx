@@ -11,16 +11,21 @@ type ImportPayload = {
 };
 
 export async function POST(req: Request) {
-  const { env } = getRequestContext();
-  const password = (env as Record<string, string | undefined>).ADMIN_PASSWORD;
-  const provided = req.headers.get('x-admin-password');
-  if (!password || !provided || provided !== password) {
-    return Response.json({ error: 'Unauthorized' }, { status: 401 });
+  try {
+    const { env } = getRequestContext();
+    const password = (env as Record<string, string | undefined>).ADMIN_PASSWORD;
+    const provided = req.headers.get('x-admin-password');
+    if (!password || !provided || provided !== password) {
+      return Response.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+    const body = (await req.json().catch(() => null)) as ImportPayload | null;
+    if (!body || !body.rates || !body.orders_index || !body.orders) {
+      return Response.json({ error: 'Invalid payload' }, { status: 400 });
+    }
+    await importAll(body);
+    return Response.json({ status: 'ok' });
+  } catch (err) {
+    const message = err instanceof Error ? err.message : 'Unknown error';
+    return Response.json({ error: message }, { status: 500 });
   }
-  const body = (await req.json().catch(() => null)) as ImportPayload | null;
-  if (!body || !body.rates || !body.orders_index || !body.orders) {
-    return Response.json({ error: 'Invalid payload' }, { status: 400 });
-  }
-  await importAll(body);
-  return Response.json({ status: 'ok' });
 }

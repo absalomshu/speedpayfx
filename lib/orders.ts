@@ -1,5 +1,5 @@
 import { v4 as uuid } from 'uuid';
-import { getKV } from './kv';
+import { getStorage } from './storage';
 import type { Order, Rates } from './types';
 
 export const DEFAULT_RATES: Rates = {
@@ -12,7 +12,7 @@ const RATES_KEY = 'rates';
 const ORDERS_INDEX_KEY = 'orders:index';
 
 export async function readRates(): Promise<Rates> {
-  const kv = getKV();
+  const kv = await getStorage();
   const raw = await kv.get(RATES_KEY);
   if (!raw) {
     const defaults: Rates = { ...DEFAULT_RATES, updated_at: new Date().toISOString() };
@@ -24,14 +24,14 @@ export async function readRates(): Promise<Rates> {
 }
 
 export async function writeRates(rates: Rates) {
-  const kv = getKV();
+  const kv = await getStorage();
   const payload = { ...rates, updated_at: new Date().toISOString() } satisfies Rates;
   await kv.put(RATES_KEY, JSON.stringify(payload));
   return payload;
 }
 
 async function getOrderIndex(): Promise<string[]> {
-  const kv = getKV();
+  const kv = await getStorage();
   const raw = await kv.get(ORDERS_INDEX_KEY);
   if (!raw) return [];
   try {
@@ -42,12 +42,12 @@ async function getOrderIndex(): Promise<string[]> {
 }
 
 async function saveOrderIndex(ids: string[]) {
-  const kv = getKV();
+  const kv = await getStorage();
   await kv.put(ORDERS_INDEX_KEY, JSON.stringify(ids));
 }
 
 export async function createOrder(order: Omit<Order, 'id' | 'created_at' | 'status'>) {
-  const kv = getKV();
+  const kv = await getStorage();
   const id = uuid();
   const created_at = new Date().toISOString();
   const record: Order = { ...order, id, created_at, status: 'OPEN' };
@@ -59,7 +59,7 @@ export async function createOrder(order: Omit<Order, 'id' | 'created_at' | 'stat
 }
 
 export async function fetchOrder(id: string): Promise<Order | null> {
-  const kv = getKV();
+  const kv = await getStorage();
   const raw = await kv.get(`order:${id}`);
   if (!raw) return null;
   try {
@@ -70,7 +70,7 @@ export async function fetchOrder(id: string): Promise<Order | null> {
 }
 
 export async function listOpenOrders(): Promise<Order[]> {
-  const kv = getKV();
+  const kv = await getStorage();
   const index = await getOrderIndex();
   const results: Order[] = [];
   for (const id of index) {
@@ -83,7 +83,7 @@ export async function listOpenOrders(): Promise<Order[]> {
 }
 
 export async function matchOrder(id: string): Promise<Order | null> {
-  const kv = getKV();
+  const kv = await getStorage();
   const order = await fetchOrder(id);
   if (!order) return null;
   const updated: Order = { ...order, status: 'MATCHED' };
@@ -92,7 +92,7 @@ export async function matchOrder(id: string): Promise<Order | null> {
 }
 
 export async function exportAll() {
-  const kv = getKV();
+  const kv = await getStorage();
   const rates = await readRates();
   const index = await getOrderIndex();
   const orders: Record<string, Order> = {};
@@ -112,7 +112,7 @@ export async function importAll(payload: {
   orders_index: string[];
   orders: Record<string, Order>;
 }) {
-  const kv = getKV();
+  const kv = await getStorage();
   await kv.put(RATES_KEY, JSON.stringify(payload.rates));
   await kv.put(ORDERS_INDEX_KEY, JSON.stringify(payload.orders_index));
   for (const [id, order] of Object.entries(payload.orders)) {

@@ -11,7 +11,7 @@ export function BackButtonBar() {
 
   return (
     <div>
-      <div className="mx-auto flex max-w-xl px-4 pb-2">
+      <div className="mx-auto flex max-w-xl px-4">
         <button
           type="button"
           onClick={() => router.back()}

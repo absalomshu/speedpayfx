@@ -13,12 +13,12 @@ Mobile-first Next.js app for matching USD ↔ XAF exchange orders. Persistence u
 - `NEXT_PUBLIC_SITE_URL` (optional base URL for server-side fetches; falls back to `CF_PAGES_URL`, `VERCEL_URL`, or `http://127.0.0.1:3000`)
 
 ## Cloudflare setup
-1) Create KV namespaces (prod + preview):
+1) KV namespaces:
+- `wrangler.toml` already binds `FX_KV` to `07113ec3cadb41ada999033818e90c83` for both prod and preview.
+- If you want preview data isolated from prod, create a separate preview namespace and update `preview_id`:
 ```
-npx wrangler kv:namespace create FX_KV
 npx wrangler kv:namespace create FX_KV --preview
 ```
-Copy the ids into `wrangler.toml` (`id` and `preview_id`).
 
 2) Set admin password secret for the Pages project:
 ```
@@ -32,11 +32,11 @@ npm install
 npm run cf:build
 ```
 
-4) Run locally with Pages emulator (uses the preview KV id and binds ADMIN_PASSWORD):
+4) Run locally with Pages emulator (uses a local KV store and binds ADMIN_PASSWORD):
 ```
 npx wrangler pages dev .vercel/output/static \
-  --kv FX_KV=<PREVIEW_NAMESPACE_ID> \
-  --binding ADMIN_PASSWORD=<your-password>
+  --binding ADMIN_PASSWORD=<your-password> \
+  --persist-to .wrangler/state
 ```
 
 5) Deploy to Cloudflare Pages:

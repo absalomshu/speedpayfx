@@ -1,6 +1,6 @@
 name = "fx-orders"
-compatibility_date = "2024-01-08"
-compatibility_flags = ["nodejs_compat"]
+compatibility_date = "2025-04-01"
+compatibility_flags = ["nodejs_compat_v2"]
 pages_build_output_dir = ".vercel/output/static"
 
 [[kv_namespaces]]

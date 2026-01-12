@@ -10,7 +10,7 @@ export function HeaderBar() {
           </Link>
         </div>
         <nav className="flex items-center gap-2 text-sm font-semibold text-midnight/80">
-          <Link href="/create" className="inline-flex items-center gap-2 rounded-full px-3 py-1 hover:bg-midnight/5">
+          <Link href="/create" className="inline-flex items-center gap-2 rounded-full px-3 py-1 text-midnight hover:bg-midnight/5">
             <svg aria-hidden="true" viewBox="0 0 20 20" className="h-4 w-4 text-midnight/70">
               <path
                 fill="currentColor"

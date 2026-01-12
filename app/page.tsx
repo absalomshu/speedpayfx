@@ -91,7 +91,7 @@ export default async function HomePage() {
           </div>
         </div>
         <p className="mt-3 text-xs font-medium uppercase tracking-wide text-midnight/60">
-          Last updated: {new Date(rates.updated_at).toLocaleString()}
+          Last updated: {new Date(rates.updated_at).toLocaleString('en-US', { timeZone: 'America/New_York', timeZoneName: 'short' })}
         </p>
       </section>
 

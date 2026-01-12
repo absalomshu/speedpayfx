@@ -89,7 +89,9 @@ export default async function OrderDetailPage({
           </div>
         </div>
         <p className="text-sm font-semibold text-midnight">{order.rate_display}</p>
-        <p className="text-xs uppercase tracking-wide text-midnight/60">Created: {new Date(order.created_at).toLocaleString()}</p>
+        <p className="text-xs uppercase tracking-wide text-midnight/60">
+          Created: {new Date(order.created_at).toLocaleString('en-US', { timeZone: 'America/New_York', timeZoneName: 'short' })}
+        </p>
       </div>
 
     </main>

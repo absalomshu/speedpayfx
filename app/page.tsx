@@ -34,11 +34,11 @@ function FlagIcon({ code }: { code: CurrencyCode }) {
 
 function ExchangeIcon() {
   return (
-    <span className="flex h-6 w-6 items-center justify-center rounded-full bg-midnight/5">
+    <span className="flex h-6 w-6 items-center justify-center">
       <svg aria-hidden="true" viewBox="0 0 20 20" className="h-3.5 w-3.5 text-midnight/70">
         <path
           fill="currentColor"
-          d="M4.5 6.5h9.19l-1.72-1.72a.75.75 0 0 1 1.06-1.06l3 3a.75.75 0 0 1 0 1.06l-3 3a.75.75 0 1 1-1.06-1.06l1.72-1.72H4.5a.75.75 0 0 1 0-1.5Zm11 7h-9.19l1.72 1.72a.75.75 0 1 1-1.06 1.06l-3-3a.75.75 0 0 1 0-1.06l3-3a.75.75 0 1 1 1.06 1.06L6.31 12H15.5a.75.75 0 0 1 0 1.5Z"
+          d="M4 10a.75.75 0 0 1 .75-.75h8.69l-1.97-1.97a.75.75 0 0 1 1.06-1.06l3.25 3.25a.75.75 0 0 1 0 1.06l-3.25 3.25a.75.75 0 1 1-1.06-1.06l1.97-1.97H4.75A.75.75 0 0 1 4 10Z"
         />
       </svg>
     </span>

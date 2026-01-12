@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 type RateConfig = {
   interval_minutes: number;
@@ -18,9 +18,16 @@ type Rates = {
   updated_at: string;
 };
 
+type NalaRates = {
+  usd_to_xaf: number;
+  xaf_to_usd: number;
+};
+
 type ConfigResponse = {
   config: RateConfig;
   rates: Rates;
+  nala_rates: NalaRates | null;
+  nala_error: string | null;
 };
 
 const formatTime = (value: string | null) => {
@@ -32,7 +39,6 @@ const formatTime = (value: string | null) => {
 };
 
 export default function AdminPage() {
-  const [password, setPassword] = useState('');
   const [intervalMinutes, setIntervalMinutes] = useState('120');
   const [offsetXaf, setOffsetXaf] = useState('2');
   const [usdMode, setUsdMode] = useState<'auto' | 'manual'>('auto');
@@ -43,20 +49,17 @@ export default function AdminPage() {
   const [ratesUpdatedAt, setRatesUpdatedAt] = useState<string | null>(null);
   const [currentUsdToXaf, setCurrentUsdToXaf] = useState<number | null>(null);
   const [currentXafToUsd, setCurrentXafToUsd] = useState<number | null>(null);
+  const [nalaUsdToXaf, setNalaUsdToXaf] = useState<number | null>(null);
+  const [nalaXafToUsd, setNalaXafToUsd] = useState<number | null>(null);
+  const [nalaError, setNalaError] = useState<string | null>(null);
   const [status, setStatus] = useState('');
   const [loading, setLoading] = useState(false);
 
   const loadSettings = async () => {
-    if (!password) {
-      setStatus('Enter the admin password to load settings.');
-      return;
-    }
     setLoading(true);
     setStatus('Loading...');
     try {
-      const res = await fetch('/api/admin/rates/config', {
-        headers: { 'x-admin-password': password },
-      });
+      const res = await fetch('/api/admin/rates/config');
       const data = (await res.json().catch(() => null)) as ConfigResponse | { error?: string } | null;
       if (!res.ok) {
         setStatus(data && 'error' in data && data.error ? data.error : 'Failed to load settings.');
@@ -84,6 +87,9 @@ export default function AdminPage() {
       setRatesUpdatedAt(data.rates.updated_at);
       setCurrentUsdToXaf(data.rates.usd_to_xaf);
       setCurrentXafToUsd(data.rates.xaf_to_usd);
+      setNalaUsdToXaf(data.nala_rates?.usd_to_xaf ?? null);
+      setNalaXafToUsd(data.nala_rates?.xaf_to_usd ?? null);
+      setNalaError(data.nala_error);
       setStatus('Settings loaded.');
     } catch (err) {
       setStatus(err instanceof Error ? err.message : 'Failed to load settings.');
@@ -92,11 +98,11 @@ export default function AdminPage() {
     }
   };
 
+  useEffect(() => {
+    loadSettings();
+  }, []);
+
   const saveSettings = async () => {
-    if (!password) {
-      setStatus('Enter the admin password to save settings.');
-      return;
-    }
     if (usdMode === 'manual' && !(Number(usdManual) > 0)) {
       setStatus('Enter a valid USD → XAF manual rate.');
       return;
@@ -112,7 +118,6 @@ export default function AdminPage() {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'x-admin-password': password,
         },
         body: JSON.stringify({
           interval_minutes: Number(intervalMinutes),
@@ -164,15 +169,25 @@ export default function AdminPage() {
       </header>
 
       <div className="card flex flex-col gap-4 p-5">
-        <div>
-          <label className="label">Admin password</label>
-          <input
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            placeholder="Enter admin password"
-            className="input"
-          />
+        <div className="rounded-2xl border border-midnight/10 bg-midnight/5 p-4">
+          <p className="text-sm font-semibold uppercase tracking-widest text-midnight/60">Current Nala rates</p>
+          {nalaError && <p className="mt-2 text-sm font-semibold text-midnight">{nalaError}</p>}
+          {!nalaError && (
+            <div className="mt-3 grid gap-3 sm:grid-cols-2">
+              <div className="rounded-xl border border-midnight/10 bg-white px-4 py-3">
+                <p className="text-xs uppercase tracking-widest text-midnight/50">USD → XAF</p>
+                <p className="text-lg font-semibold text-midnight">
+                  {nalaUsdToXaf ?? '—'} XAF
+                </p>
+              </div>
+              <div className="rounded-xl border border-midnight/10 bg-white px-4 py-3">
+                <p className="text-xs uppercase tracking-widest text-midnight/50">XAF → USD</p>
+                <p className="text-lg font-semibold text-midnight">
+                  {nalaXafToUsd ?? '—'} XAF
+                </p>
+              </div>
+            </div>
+          )}
         </div>
 
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
@@ -201,14 +216,14 @@ export default function AdminPage() {
         <div className="grid grid-cols-1 gap-4">
           <div>
             <label className="label">USD → XAF rate</label>
-            <div className="flex flex-wrap gap-2">
+            <div className="flex rounded-full border border-midnight/10 bg-midnight/5 p-1 text-sm font-semibold text-midnight/60">
               <button
                 type="button"
                 onClick={() => setUsdMode('auto')}
-                className={`rounded-xl px-4 py-2 text-sm font-semibold transition ${
+                className={`flex-1 rounded-full px-3 py-2 transition ${
                   usdMode === 'auto'
-                    ? 'bg-midnight text-sand shadow-lg shadow-midnight/20'
-                    : 'border border-midnight/20 bg-white text-midnight'
+                    ? 'bg-white text-midnight shadow-sm shadow-midnight/10'
+                    : 'hover:text-midnight'
                 }`}
               >
                 Use local rate
@@ -216,40 +231,42 @@ export default function AdminPage() {
               <button
                 type="button"
                 onClick={() => setUsdMode('manual')}
-                className={`rounded-xl px-4 py-2 text-sm font-semibold transition ${
+                className={`flex-1 rounded-full px-3 py-2 transition ${
                   usdMode === 'manual'
-                    ? 'bg-midnight text-sand shadow-lg shadow-midnight/20'
-                    : 'border border-midnight/20 bg-white text-midnight'
+                    ? 'bg-white text-midnight shadow-sm shadow-midnight/10'
+                    : 'hover:text-midnight'
                 }`}
               >
                 Manual rate
               </button>
             </div>
-            <input
-              type="number"
-              min="0"
-              step="0.01"
-              value={usdManual}
-              onChange={(e) => setUsdManual(e.target.value)}
-              className="input mt-2"
-              placeholder="Enter manual USD → XAF rate"
-              disabled={usdMode !== 'manual'}
-            />
-            {currentUsdToXaf !== null && (
-              <p className="mt-1 text-xs text-midnight/60">Current: {currentUsdToXaf} XAF</p>
+            {usdMode === 'manual' ? (
+              <input
+                type="number"
+                min="0"
+                step="0.01"
+                value={usdManual}
+                onChange={(e) => setUsdManual(e.target.value)}
+                className="input mt-2"
+                placeholder="Enter manual USD → XAF rate"
+              />
+            ) : (
+              <p className="mt-2 text-sm font-semibold text-midnight/70">
+                Local rate: {currentUsdToXaf ?? '—'} XAF
+              </p>
             )}
           </div>
 
           <div>
             <label className="label">XAF → USD rate</label>
-            <div className="flex flex-wrap gap-2">
+            <div className="flex rounded-full border border-midnight/10 bg-midnight/5 p-1 text-sm font-semibold text-midnight/60">
               <button
                 type="button"
                 onClick={() => setXafMode('auto')}
-                className={`rounded-xl px-4 py-2 text-sm font-semibold transition ${
+                className={`flex-1 rounded-full px-3 py-2 transition ${
                   xafMode === 'auto'
-                    ? 'bg-midnight text-sand shadow-lg shadow-midnight/20'
-                    : 'border border-midnight/20 bg-white text-midnight'
+                    ? 'bg-white text-midnight shadow-sm shadow-midnight/10'
+                    : 'hover:text-midnight'
                 }`}
               >
                 Use local rate
@@ -257,34 +274,36 @@ export default function AdminPage() {
               <button
                 type="button"
                 onClick={() => setXafMode('manual')}
-                className={`rounded-xl px-4 py-2 text-sm font-semibold transition ${
+                className={`flex-1 rounded-full px-3 py-2 transition ${
                   xafMode === 'manual'
-                    ? 'bg-midnight text-sand shadow-lg shadow-midnight/20'
-                    : 'border border-midnight/20 bg-white text-midnight'
+                    ? 'bg-white text-midnight shadow-sm shadow-midnight/10'
+                    : 'hover:text-midnight'
                 }`}
               >
                 Manual rate
               </button>
             </div>
-            <input
-              type="number"
-              min="0"
-              step="0.01"
-              value={xafManual}
-              onChange={(e) => setXafManual(e.target.value)}
-              className="input mt-2"
-              placeholder="Enter manual XAF → USD rate"
-              disabled={xafMode !== 'manual'}
-            />
-            {currentXafToUsd !== null && (
-              <p className="mt-1 text-xs text-midnight/60">Current: {currentXafToUsd} XAF</p>
+            {xafMode === 'manual' ? (
+              <input
+                type="number"
+                min="0"
+                step="0.01"
+                value={xafManual}
+                onChange={(e) => setXafManual(e.target.value)}
+                className="input mt-2"
+                placeholder="Enter manual XAF → USD rate"
+              />
+            ) : (
+              <p className="mt-2 text-sm font-semibold text-midnight/70">
+                Local rate: {currentXafToUsd ?? '—'} XAF
+              </p>
             )}
           </div>
         </div>
 
         <div className="flex flex-wrap gap-3">
           <button onClick={loadSettings} className="btn" disabled={loading}>
-            Load settings
+            Refresh
           </button>
           <button onClick={saveSettings} className="btn" disabled={loading}>
             Save settings

@@ -1,42 +1,22 @@
-import { getRequestContext } from '@cloudflare/next-on-pages';
 import { readRates } from '../../../../../lib/orders';
-import { readRateConfig, writeRateConfig } from '../../../../../lib/rate-updater';
+import { readNalaRates, readRateConfig, writeRateConfig } from '../../../../../lib/rate-updater';
 import type { RateConfig, RateMode } from '../../../../../lib/types';
 
 export const runtime = 'edge';
 
-const getAdminPassword = () => {
-  const { env } = getRequestContext();
-  return (env as Record<string, string | undefined>).ADMIN_PASSWORD;
-};
-
-const authorize = (req: Request) => {
-  const password = getAdminPassword();
-  if (!password) {
-    return { ok: false, status: 500, error: 'Admin password not set' } as const;
-  }
-  const provided = req.headers.get('x-admin-password');
-  if (!provided || provided !== password) {
-    return { ok: false, status: 401, error: 'Unauthorized' } as const;
-  }
-  return { ok: true } as const;
-};
-
 export async function GET(req: Request) {
-  const auth = authorize(req);
-  if (!auth.ok) {
-    return Response.json({ error: auth.error }, { status: auth.status });
-  }
   const [config, rates] = await Promise.all([readRateConfig(), readRates()]);
-  return Response.json({ config, rates });
+  let nalaRates = null;
+  let nalaError: string | null = null;
+  try {
+    nalaRates = await readNalaRates();
+  } catch (err) {
+    nalaError = err instanceof Error ? err.message : 'Failed to load Nala rates';
+  }
+  return Response.json({ config, rates, nala_rates: nalaRates, nala_error: nalaError });
 }
 
 export async function POST(req: Request) {
-  const auth = authorize(req);
-  if (!auth.ok) {
-    return Response.json({ error: auth.error }, { status: auth.status });
-  }
-
   const body = (await req.json().catch(() => null)) as Partial<RateConfig> | null;
   if (!body) {
     return Response.json({ error: 'Invalid payload' }, { status: 400 });

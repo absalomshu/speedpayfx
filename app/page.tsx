@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { readRates } from '../lib/orders';
+import { maybeRefreshRates } from '../lib/rate-updater';
 import type { Rates } from '../lib/types';
 
 export const dynamic = 'force-dynamic';
@@ -46,7 +46,7 @@ function ExchangeIcon() {
 }
 
 export default async function HomePage() {
-  const rates: Rates = await readRates();
+  const { rates }: { rates: Rates } = await maybeRefreshRates();
 
   return (
     <main className="mx-auto flex max-w-xl flex-col gap-6 px-5 py-8">

@@ -153,6 +153,10 @@ async function fetchNalaRates(): Promise<NalaRates> {
   };
 }
 
+export async function readNalaRates() {
+  return fetchNalaRates();
+}
+
 export async function maybeRefreshRates(options?: { force?: boolean }) {
   const config = await readRateConfig();
   const rates = await readRates();

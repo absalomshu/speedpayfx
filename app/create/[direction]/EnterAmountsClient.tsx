@@ -17,6 +17,38 @@ type Props = {
   direction: 'want-usd' | 'want-xaf';
 };
 
+type CurrencyBadgeProps = {
+  code: string;
+};
+
+function CurrencyBadge({ code }: CurrencyBadgeProps) {
+  const isUsd = code === 'USD';
+  return (
+    <span className="inline-flex items-center gap-2 rounded-full border border-midnight/10 bg-white/90 px-2 py-1 text-xs font-semibold text-midnight/80 shadow-sm shadow-midnight/10">
+      <span className="flex h-4 w-4 items-center justify-center overflow-hidden rounded-sm border border-midnight/10 bg-white">
+        {isUsd ? (
+          <svg aria-hidden="true" viewBox="0 0 24 16" className="h-3 w-4">
+            <rect width="24" height="16" fill="#ffffff" />
+            <rect width="24" height="2" y="0" fill="#b31942" />
+            <rect width="24" height="2" y="4" fill="#b31942" />
+            <rect width="24" height="2" y="8" fill="#b31942" />
+            <rect width="24" height="2" y="12" fill="#b31942" />
+            <rect width="9.6" height="7" x="0" y="0" fill="#0a3161" />
+          </svg>
+        ) : (
+          <svg aria-hidden="true" viewBox="0 0 24 16" className="h-3 w-4">
+            <rect width="8" height="16" x="0" y="0" fill="#007a5e" />
+            <rect width="8" height="16" x="8" y="0" fill="#ce1126" />
+            <rect width="8" height="16" x="16" y="0" fill="#fcd116" />
+            <polygon points="12,5.2 12.9,7.5 15.3,7.5 13.3,8.9 14.1,11.1 12,9.7 9.9,11.1 10.7,8.9 8.7,7.5 11.1,7.5" fill="#fcd116" />
+          </svg>
+        )}
+      </span>
+      {code}
+    </span>
+  );
+}
+
 export default function EnterAmountsClient({ direction }: Props) {
   const router = useRouter();
   const [rates, setRates] = useState<Rates>(initialRates);
@@ -175,17 +207,19 @@ export default function EnterAmountsClient({ direction }: Props) {
           {activeField === 'have' && (
             <div className="flex flex-col gap-4">
               <div className="flex items-center gap-3">
-                <input
-                  type="number"
-                  min="0"
-                  value={haveAmount}
-                  onChange={(e) => setHaveAmount(e.target.value)}
-                  placeholder="Amount"
-                  className="input"
-                />
-                <select className="input max-w-[90px]" value={meta.haveCurrency} disabled>
-                  <option>{meta.haveCurrency}</option>
-                </select>
+                <div className="relative w-full">
+                  <input
+                    type="number"
+                    min="0"
+                    value={haveAmount}
+                    onChange={(e) => setHaveAmount(e.target.value)}
+                    placeholder="Amount"
+                    className="input pr-24"
+                  />
+                  <div className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2">
+                    <CurrencyBadge code={meta.haveCurrency} />
+                  </div>
+                </div>
               </div>
 
               <div className="flex items-center gap-3 rounded-xl border border-midnight/10 bg-midnight/5 px-3 py-2 text-sm font-semibold text-midnight/70">
@@ -206,16 +240,18 @@ export default function EnterAmountsClient({ direction }: Props) {
               <div>
                 <label className="label">{secondaryLabel}</label>
                 <div className="flex items-center gap-3">
-                  <input
-                    type="text"
-                    value={secondaryAmount}
-                    readOnly
-                    placeholder="Calculated amount"
-                    className="input bg-midnight/5 text-midnight/80"
-                  />
-                  <select className="input max-w-[90px]" value={secondaryCurrency} disabled>
-                    <option>{secondaryCurrency}</option>
-                  </select>
+                  <div className="relative w-full">
+                    <input
+                      type="text"
+                      value={secondaryAmount}
+                      readOnly
+                      placeholder="Calculated amount"
+                      className="input bg-midnight/5 pr-24 text-midnight/80"
+                    />
+                    <div className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2">
+                      <CurrencyBadge code={secondaryCurrency} />
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
@@ -236,17 +272,19 @@ export default function EnterAmountsClient({ direction }: Props) {
           {activeField === 'need' && (
             <div className="flex flex-col gap-4">
               <div className="flex items-center gap-3">
-                <input
-                  type="number"
-                  min="0"
-                  value={needAmount}
-                  onChange={(e) => setNeedAmount(e.target.value)}
-                  placeholder="Amount"
-                  className="input"
-                />
-                <select className="input max-w-[90px]" value={meta.needCurrency} disabled>
-                  <option>{meta.needCurrency}</option>
-                </select>
+                <div className="relative w-full">
+                  <input
+                    type="number"
+                    min="0"
+                    value={needAmount}
+                    onChange={(e) => setNeedAmount(e.target.value)}
+                    placeholder="Amount"
+                    className="input pr-24"
+                  />
+                  <div className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2">
+                    <CurrencyBadge code={meta.needCurrency} />
+                  </div>
+                </div>
               </div>
 
               <div className="flex items-center gap-3 rounded-xl border border-midnight/10 bg-midnight/5 px-3 py-2 text-sm font-semibold text-midnight/70">
@@ -267,16 +305,18 @@ export default function EnterAmountsClient({ direction }: Props) {
               <div>
                 <label className="label">{secondaryLabel}</label>
                 <div className="flex items-center gap-3">
-                  <input
-                    type="text"
-                    value={secondaryAmount}
-                    readOnly
-                    placeholder="Calculated amount"
-                    className="input bg-midnight/5 text-midnight/80"
-                  />
-                  <select className="input max-w-[90px]" value={secondaryCurrency} disabled>
-                    <option>{secondaryCurrency}</option>
-                  </select>
+                  <div className="relative w-full">
+                    <input
+                      type="text"
+                      value={secondaryAmount}
+                      readOnly
+                      placeholder="Calculated amount"
+                      className="input bg-midnight/5 pr-24 text-midnight/80"
+                    />
+                    <div className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2">
+                      <CurrencyBadge code={secondaryCurrency} />
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>

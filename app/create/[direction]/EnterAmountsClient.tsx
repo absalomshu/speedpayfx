@@ -24,7 +24,9 @@ export default function EnterAmountsClient({ direction }: Props) {
   const [haveAmount, setHaveAmount] = useState('');
   const [needAmount, setNeedAmount] = useState('');
   const [desiredRate, setDesiredRate] = useState('');
-  const [activeField, setActiveField] = useState<ActiveField>('have');
+  const [activeField, setActiveField] = useState<ActiveField>(
+    direction === 'want-usd' ? 'need' : 'have',
+  );
   const [error, setError] = useState('');
   const [submitting, setSubmitting] = useState(false);
 
@@ -41,6 +43,7 @@ export default function EnterAmountsClient({ direction }: Props) {
         haveCurrency: 'XAF',
         needCurrency: 'USD',
         rate,
+        hasCustomRate,
       };
     }
     return {
@@ -49,8 +52,30 @@ export default function EnterAmountsClient({ direction }: Props) {
       haveCurrency: 'USD',
       needCurrency: 'XAF',
       rate,
+      hasCustomRate,
     };
   }, [direction, desiredRate, rates]);
+
+  const rateLabel = meta.hasCustomRate ? 'Requested rate' : 'Live rate';
+  const secondaryLabel = activeField === 'need' ? 'You will pay' : 'You will receive';
+  const secondaryCurrency = activeField === 'need' ? meta.haveCurrency : meta.needCurrency;
+
+  const secondaryAmount = useMemo(() => {
+    const rate = meta.rate;
+    if (!Number.isFinite(rate) || rate <= 0) return '';
+
+    if (activeField === 'need') {
+      const need = Number(needAmount);
+      if (!(need > 0)) return '';
+      const value = meta.direction === 'WANT_USD' ? need * rate : need / rate;
+      return value.toFixed(2);
+    }
+
+    const have = Number(haveAmount);
+    if (!(have > 0)) return '';
+    const value = meta.direction === 'WANT_USD' ? have / rate : have * rate;
+    return value.toFixed(2);
+  }, [activeField, haveAmount, needAmount, meta.direction, meta.rate]);
 
   useEffect(() => {
     fetch('/api/rates')
@@ -130,7 +155,9 @@ export default function EnterAmountsClient({ direction }: Props) {
       <header className="flex flex-col gap-2">
         <p className="text-sm font-semibold uppercase tracking-widest text-midnight/60">Enter Amounts</p>
         <h1 className="text-2xl font-black text-midnight">{meta.title}</h1>
-        <p className="text-midnight/60">{loadingRates ? 'Loading rates...' : `Using rate ${meta.rate} XAF per 1 USD`}</p>
+        <p className="text-midnight/60">
+          {loadingRates ? 'Loading rates...' : `${rateLabel} ${meta.rate} XAF per 1 USD`}
+        </p>
       </header>
 
       <div className="card flex flex-col gap-4 p-5">
@@ -145,20 +172,54 @@ export default function EnterAmountsClient({ direction }: Props) {
             />
             <span>I have</span>
           </label>
-          <div className="flex items-center gap-3">
-            <input
-              type="number"
-              min="0"
-              value={haveAmount}
-              onChange={(e) => setHaveAmount(e.target.value)}
-              placeholder="Amount"
-              className="input"
-              disabled={activeField !== 'have'}
-            />
-            <select className="input max-w-[90px]" value={meta.haveCurrency} disabled>
-              <option>{meta.haveCurrency}</option>
-            </select>
-          </div>
+          {activeField === 'have' && (
+            <div className="flex flex-col gap-4">
+              <div className="flex items-center gap-3">
+                <input
+                  type="number"
+                  min="0"
+                  value={haveAmount}
+                  onChange={(e) => setHaveAmount(e.target.value)}
+                  placeholder="Amount"
+                  className="input"
+                />
+                <select className="input max-w-[90px]" value={meta.haveCurrency} disabled>
+                  <option>{meta.haveCurrency}</option>
+                </select>
+              </div>
+
+              <div className="flex items-center gap-3 rounded-xl border border-midnight/10 bg-midnight/5 px-3 py-2 text-sm font-semibold text-midnight/70">
+                <div className="flex h-9 w-9 items-center justify-center rounded-full bg-white shadow-sm shadow-midnight/10">
+                  <svg aria-hidden="true" viewBox="0 0 20 20" className="h-4 w-4 text-midnight/70">
+                    <path
+                      fill="currentColor"
+                      d="M4.5 6.5h9.19l-1.72-1.72a.75.75 0 0 1 1.06-1.06l3 3a.75.75 0 0 1 0 1.06l-3 3a.75.75 0 1 1-1.06-1.06l1.72-1.72H4.5a.75.75 0 0 1 0-1.5Zm11 7h-9.19l1.72 1.72a.75.75 0 1 1-1.06 1.06l-3-3a.75.75 0 0 1 0-1.06l3-3a.75.75 0 1 1 1.06 1.06L6.31 12H15.5a.75.75 0 0 1 0 1.5Z"
+                    />
+                  </svg>
+                </div>
+                <div className="flex flex-col">
+                  <span className="text-[11px] uppercase tracking-widest text-midnight/50">{rateLabel}</span>
+                  <span className="text-sm font-semibold text-midnight">{`${meta.rate} XAF = 1 USD`}</span>
+                </div>
+              </div>
+
+              <div>
+                <label className="label">{secondaryLabel}</label>
+                <div className="flex items-center gap-3">
+                  <input
+                    type="text"
+                    value={secondaryAmount}
+                    readOnly
+                    placeholder="Calculated amount"
+                    className="input bg-midnight/5 text-midnight/80"
+                  />
+                  <select className="input max-w-[90px]" value={secondaryCurrency} disabled>
+                    <option>{secondaryCurrency}</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
 
         <div>
@@ -172,24 +233,59 @@ export default function EnterAmountsClient({ direction }: Props) {
             />
             <span>I need</span>
           </label>
-          <div className="flex items-center gap-3">
-            <input
-              type="number"
-              min="0"
-              value={needAmount}
-              onChange={(e) => setNeedAmount(e.target.value)}
-              placeholder="Amount"
-              className="input"
-              disabled={activeField !== 'need'}
-            />
-            <select className="input max-w-[90px]" value={meta.needCurrency} disabled>
-              <option>{meta.needCurrency}</option>
-            </select>
-          </div>
+          {activeField === 'need' && (
+            <div className="flex flex-col gap-4">
+              <div className="flex items-center gap-3">
+                <input
+                  type="number"
+                  min="0"
+                  value={needAmount}
+                  onChange={(e) => setNeedAmount(e.target.value)}
+                  placeholder="Amount"
+                  className="input"
+                />
+                <select className="input max-w-[90px]" value={meta.needCurrency} disabled>
+                  <option>{meta.needCurrency}</option>
+                </select>
+              </div>
+
+              <div className="flex items-center gap-3 rounded-xl border border-midnight/10 bg-midnight/5 px-3 py-2 text-sm font-semibold text-midnight/70">
+                <div className="flex h-9 w-9 items-center justify-center rounded-full bg-white shadow-sm shadow-midnight/10">
+                  <svg aria-hidden="true" viewBox="0 0 20 20" className="h-4 w-4 text-midnight/70">
+                    <path
+                      fill="currentColor"
+                      d="M4.5 6.5h9.19l-1.72-1.72a.75.75 0 0 1 1.06-1.06l3 3a.75.75 0 0 1 0 1.06l-3 3a.75.75 0 1 1-1.06-1.06l1.72-1.72H4.5a.75.75 0 0 1 0-1.5Zm11 7h-9.19l1.72 1.72a.75.75 0 1 1-1.06 1.06l-3-3a.75.75 0 0 1 0-1.06l3-3a.75.75 0 1 1 1.06 1.06L6.31 12H15.5a.75.75 0 0 1 0 1.5Z"
+                    />
+                  </svg>
+                </div>
+                <div className="flex flex-col">
+                  <span className="text-[11px] uppercase tracking-widest text-midnight/50">{rateLabel}</span>
+                  <span className="text-sm font-semibold text-midnight">{`${meta.rate} XAF = 1 USD`}</span>
+                </div>
+              </div>
+
+              <div>
+                <label className="label">{secondaryLabel}</label>
+                <div className="flex items-center gap-3">
+                  <input
+                    type="text"
+                    value={secondaryAmount}
+                    readOnly
+                    placeholder="Calculated amount"
+                    className="input bg-midnight/5 text-midnight/80"
+                  />
+                  <select className="input max-w-[90px]" value={secondaryCurrency} disabled>
+                    <option>{secondaryCurrency}</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
 
         <div>
           <label className="label">Desired rate (optional)</label>
+          <p className="text-xs font-semibold text-midnight/50">Optional. Enter a different rate than the one shown above.</p>
           <div className="flex items-center gap-3">
             <input
               type="number"

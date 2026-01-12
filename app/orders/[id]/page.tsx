@@ -1,5 +1,4 @@
 import Link from 'next/link';
-import MatchOrderButton from '../../../components/MatchOrderButton';
 import { fetchOrder } from '../../../lib/orders';
 import type { Order } from '../../../lib/types';
 
@@ -33,7 +32,15 @@ function FlagIcon({ code }: { code: CurrencyCode }) {
   );
 }
 
-export default async function OrderDetailPage({ params }: { params: Promise<{ id: string }> }) {
+export default async function OrderDetailPage({
+  params,
+  searchParams,
+}: {
+  params: Promise<{ id: string }>;
+  searchParams?: Promise<{ created?: string }>;
+}) {
+  const resolvedSearchParams = searchParams ? await searchParams : undefined;
+  const showCreatedNotice = resolvedSearchParams?.created === '1';
   let order: Order | null = null;
   try {
     const resolved = await params;
@@ -54,10 +61,12 @@ export default async function OrderDetailPage({ params }: { params: Promise<{ id
   return (
     <main className="mx-auto flex max-w-xl flex-col gap-5 px-5 py-8">
       <div className="card flex flex-col gap-4 p-6">
-        <div className="rounded-xl border border-midnight/10 bg-midnight/5 px-4 py-3">
-          <p className="text-sm font-semibold text-midnight">Your order has been created</p>
-          <p className="text-xs uppercase tracking-wide text-midnight/60">Order ID</p>
-          <p className="text-sm font-semibold text-midnight/80">{order.id}</p>
+        <div className="flex flex-col gap-1">
+          {showCreatedNotice && <p className="text-sm font-semibold text-midnight">Your order has been created</p>}
+          <p className="text-sm font-semibold text-midnight/80">
+            <span className="text-xs uppercase tracking-wide text-midnight/60">Order ID</span>{' '}
+            <span className="truncate">{order.id}</span>
+          </p>
         </div>
 
         <div className="flex items-center justify-between">
@@ -83,7 +92,6 @@ export default async function OrderDetailPage({ params }: { params: Promise<{ id
         <p className="text-xs uppercase tracking-wide text-midnight/60">Created: {new Date(order.created_at).toLocaleString()}</p>
       </div>
 
-      <MatchOrderButton orderId={order.id} initialStatus={order.status} />
     </main>
   );
 }

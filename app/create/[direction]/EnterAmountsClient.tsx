@@ -172,7 +172,7 @@ export default function EnterAmountsClient({ direction }: Props) {
         throw new Error(body.error || 'Failed to create order');
       }
       const order = await res.json();
-      router.push(`/orders/${order.id}`);
+      router.push(`/orders/${order.id}?created=1`);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Something went wrong');
     } finally {

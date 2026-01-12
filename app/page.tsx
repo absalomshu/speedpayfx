@@ -60,8 +60,8 @@ export default async function HomePage() {
           <h2 className="text-lg font-bold text-midnight">Exchange Rates</h2>
           <span className="rounded-full bg-midnight/5 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-midnight/70">Live</span>
         </div>
-        <div className="grid grid-cols-1 gap-4 rounded-xl bg-midnight/5 px-4 py-3 shadow-inner shadow-midnight/5 sm:grid-cols-2">
-          <div className="flex flex-col gap-1">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+          <div className="flex flex-col gap-1 rounded-xl bg-midnight/5 px-4 py-3 shadow-inner shadow-midnight/5">
             <p className="flex items-center gap-2 text-sm font-semibold uppercase tracking-wide text-midnight/60">
               <span className="inline-flex items-center gap-1.5">
                 <FlagIcon code="USD" />
@@ -75,7 +75,7 @@ export default async function HomePage() {
             </p>
             <p className="text-2xl font-black text-midnight">1 USD = {rates.usd_to_xaf} XAF</p>
           </div>
-          <div className="flex flex-col gap-1">
+          <div className="flex flex-col gap-1 rounded-xl bg-midnight/5 px-4 py-3 shadow-inner shadow-midnight/5">
             <p className="flex items-center gap-2 text-sm font-semibold uppercase tracking-wide text-midnight/60">
               <span className="inline-flex items-center gap-1.5">
                 <FlagIcon code="XAF" />

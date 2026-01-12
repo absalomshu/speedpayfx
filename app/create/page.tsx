@@ -12,7 +12,7 @@ type Option = {
 const options: Option[] = [
   {
     currencyCode: 'XAF',
-    currencyLabel: 'franc CFA',
+    currencyLabel: 'XAF',
     description: 'I will pay USD, receive XAF',
     href: '/create/want-xaf',
   },

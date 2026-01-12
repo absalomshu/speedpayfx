@@ -24,8 +24,8 @@ type CurrencyBadgeProps = {
 function CurrencyBadge({ code }: CurrencyBadgeProps) {
   const isUsd = code === 'USD';
   return (
-    <span className="inline-flex items-center gap-2 rounded-full border border-midnight/10 bg-white/90 px-2 py-1 text-xs font-semibold text-midnight/80 shadow-sm shadow-midnight/10">
-      <span className="flex h-4 w-4 items-center justify-center overflow-hidden rounded-sm border border-midnight/10 bg-white">
+    <span className="inline-flex items-center gap-2 rounded-lg border border-midnight/10 bg-white/90 px-2.5 py-1.5 text-sm font-semibold text-midnight/80 shadow-sm shadow-midnight/10">
+      <span className="flex h-5 w-5 items-center justify-center overflow-hidden rounded-sm bg-white">
         {isUsd ? (
           <svg aria-hidden="true" viewBox="0 0 24 16" className="h-3 w-4">
             <rect width="24" height="16" fill="#ffffff" />
@@ -330,7 +330,7 @@ export default function EnterAmountsClient({ direction }: Props) {
               value={desiredRate}
               onChange={(e) => setDesiredRate(e.target.value)}
               placeholder={`${meta.rate}`}
-              className="input"
+              className="input max-w-[200px]"
             />
             <span className="text-sm font-semibold text-midnight/70">XAF per 1 USD</span>
           </div>

@@ -1,16 +1,22 @@
 import { getRequestContext } from '@cloudflare/next-on-pages';
 import { readRates, writeRates } from '../../../lib/orders';
+import { maybeRefreshRates } from '../../../lib/rate-updater';
 import type { Rates } from '../../../lib/types';
 
 export const runtime = 'edge';
 
 export async function GET() {
   try {
-    const rates = await readRates();
+    const { rates } = await maybeRefreshRates();
     return Response.json(rates);
   } catch (err) {
-    const message = err instanceof Error ? err.message : 'Unknown error';
-    return Response.json({ error: message }, { status: 500 });
+    try {
+      const rates = await readRates();
+      return Response.json(rates);
+    } catch (inner) {
+      const message = inner instanceof Error ? inner.message : 'Unknown error';
+      return Response.json({ error: message }, { status: 500 });
+    }
   }
 }
 

@@ -10,6 +10,8 @@ Mobile-first Next.js app for matching USD ↔ XAF exchange orders. Persistence u
 
 ## Environment
 - `ADMIN_PASSWORD` (required for POST /api/rates, admin export/import)
+- `NALA_RATES_URL` (optional, defaults to `https://partners-api.prod.nala-api.com/v1/fx/rates`)
+- `NALA_API_KEY`, `NALA_API_KEY_HEADER`, `NALA_API_KEY_PREFIX` (optional; not needed for the default Nala rates endpoint)
 - `NEXT_PUBLIC_SITE_URL` (optional base URL for server-side fetches; falls back to `CF_PAGES_URL`, `VERCEL_URL`, or `http://127.0.0.1:3000`)
 
 ## Cloudflare setup
@@ -66,7 +68,11 @@ npx wrangler pages dev .vercel/output/static \
 - `POST /api/orders/:id/match` – mark status MATCHED
 - `GET /api/admin/export` – admin-only JSON export (header `x-admin-password`)
 - `POST /api/admin/import` – admin-only import from the same JSON format
+- `GET /api/admin/rates/config` – admin-only rate config (header `x-admin-password`)
+- `POST /api/admin/rates/config` – update rate config (header `x-admin-password`)
 
 ## Notes
+- Rates are pulled from the Nala partners API (USD → XAF, provider `NALA`). If a direct XAF → USD rate is not present, the USD → XAF rate is reused.
+- Use `/admin` to adjust the rate update interval and the XAF offset (password required).
 - Data is stored as JSON in KV keys: `rates`, `orders:index`, and `order:{id}` per order.
 - Design is mobile-first with simple cards and large tap targets.

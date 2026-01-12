@@ -185,9 +185,6 @@ export default function EnterAmountsClient({ direction }: Props) {
       <header className="flex flex-col gap-2">
         <p className="text-sm font-semibold uppercase tracking-widest text-midnight/60">Enter Amounts</p>
         <h1 className="text-2xl font-black text-midnight">{meta.title}</h1>
-        <p className="text-midnight/60">
-          {loadingRates ? 'Loading rates...' : `${rateLabel} ${meta.rate} XAF per 1 USD`}
-        </p>
       </header>
 
       <div className="card flex flex-col gap-5 p-5">

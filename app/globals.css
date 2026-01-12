@@ -6,6 +6,10 @@
   color-scheme: light;
 }
 
+html.font-scale-large {
+  font-size: 112.5%;
+}
+
 body {
   @apply bg-sand text-midnight min-h-screen;
 }

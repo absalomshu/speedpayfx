@@ -56,9 +56,7 @@ export default function EnterAmountsClient({ direction }: Props) {
   const [haveAmount, setHaveAmount] = useState('');
   const [needAmount, setNeedAmount] = useState('');
   const [desiredRate, setDesiredRate] = useState('');
-  const [activeField, setActiveField] = useState<ActiveField>(
-    direction === 'want-usd' ? 'need' : 'have',
-  );
+  const [activeField, setActiveField] = useState<ActiveField>('need');
   const [error, setError] = useState('');
   const [submitting, setSubmitting] = useState(false);
 
@@ -192,136 +190,135 @@ export default function EnterAmountsClient({ direction }: Props) {
         </p>
       </header>
 
-      <div className="card flex flex-col gap-4 p-5">
-        <div>
-          <label className="label flex items-center gap-2">
-            <input
-              type="radio"
-              name="field"
-              checked={activeField === 'have'}
-              onChange={() => setActiveField('have')}
-              className="h-4 w-4"
-            />
-            <span>I have</span>
-          </label>
-          {activeField === 'have' && (
-            <div className="flex flex-col gap-4">
-              <div className="flex items-center gap-3">
-                <div className="relative w-full">
-                  <input
-                    type="number"
-                    min="0"
-                    value={haveAmount}
-                    onChange={(e) => setHaveAmount(e.target.value)}
-                    placeholder="Amount"
-                    className="input pr-24"
-                  />
-                  <div className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2">
-                    <CurrencyBadge code={meta.haveCurrency} />
-                  </div>
-                </div>
-              </div>
+      <div className="card flex flex-col gap-5 p-5">
+        <div className="flex rounded-full border border-midnight/10 bg-midnight/5 p-1 text-sm font-semibold text-midnight/60">
+          <button
+            type="button"
+            onClick={() => setActiveField('need')}
+            className={`flex-1 rounded-full px-3 py-2 transition ${
+              activeField === 'need'
+                ? 'bg-white text-midnight shadow-sm shadow-midnight/10'
+                : 'hover:text-midnight'
+            }`}
+          >
+            I need
+          </button>
+          <button
+            type="button"
+            onClick={() => setActiveField('have')}
+            className={`flex-1 rounded-full px-3 py-2 transition ${
+              activeField === 'have'
+                ? 'bg-white text-midnight shadow-sm shadow-midnight/10'
+                : 'hover:text-midnight'
+            }`}
+          >
+            I have
+          </button>
+        </div>
 
-              <div className="flex items-center gap-3 rounded-xl border border-midnight/10 bg-midnight/5 px-3 py-2 text-sm font-semibold text-midnight/70">
-                <div className="flex h-9 w-9 items-center justify-center rounded-full bg-white shadow-sm shadow-midnight/10">
-                  <svg aria-hidden="true" viewBox="0 0 20 20" className="h-4 w-4 text-midnight/70">
-                    <path
-                      fill="currentColor"
-                      d="M4.5 6.5h9.19l-1.72-1.72a.75.75 0 0 1 1.06-1.06l3 3a.75.75 0 0 1 0 1.06l-3 3a.75.75 0 1 1-1.06-1.06l1.72-1.72H4.5a.75.75 0 0 1 0-1.5Zm11 7h-9.19l1.72 1.72a.75.75 0 1 1-1.06 1.06l-3-3a.75.75 0 0 1 0-1.06l3-3a.75.75 0 1 1 1.06 1.06L6.31 12H15.5a.75.75 0 0 1 0 1.5Z"
-                    />
-                  </svg>
-                </div>
-                <div className="flex flex-col">
-                  <span className="text-[11px] uppercase tracking-widest text-midnight/50">{rateLabel}</span>
-                  <span className="text-sm font-semibold text-midnight">{`${meta.rate} XAF = 1 USD`}</span>
-                </div>
-              </div>
-
-              <div>
-                <label className="label">{secondaryLabel}</label>
-                <div className="flex items-center gap-3">
-                  <div className="relative w-full">
-                    <input
-                      type="text"
-                      value={secondaryAmount}
-                      readOnly
-                      placeholder="Calculated amount"
-                      className="input bg-midnight/5 pr-24 text-midnight/80"
-                    />
-                    <div className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2">
-                      <CurrencyBadge code={secondaryCurrency} />
-                    </div>
-                  </div>
+        {activeField === 'need' && (
+          <div className="flex flex-col gap-4">
+            <div className="flex flex-col gap-2">
+              <label className="label">Amount needed</label>
+              <div className="relative w-full">
+                <input
+                  type="number"
+                  min="0"
+                  value={needAmount}
+                  onChange={(e) => setNeedAmount(e.target.value)}
+                  placeholder="Amount"
+                  className="input pr-24"
+                />
+                <div className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2">
+                  <CurrencyBadge code={meta.needCurrency} />
                 </div>
               </div>
             </div>
-          )}
-        </div>
 
-        <div>
-          <label className="label flex items-center gap-2">
-            <input
-              type="radio"
-              name="field"
-              checked={activeField === 'need'}
-              onChange={() => setActiveField('need')}
-              className="h-4 w-4"
-            />
-            <span>I need</span>
-          </label>
-          {activeField === 'need' && (
-            <div className="flex flex-col gap-4">
-              <div className="flex items-center gap-3">
-                <div className="relative w-full">
-                  <input
-                    type="number"
-                    min="0"
-                    value={needAmount}
-                    onChange={(e) => setNeedAmount(e.target.value)}
-                    placeholder="Amount"
-                    className="input pr-24"
+            <div className="flex items-center gap-3 rounded-xl border border-midnight/10 bg-midnight/5 px-3 py-2 text-sm font-semibold text-midnight/70">
+              <div className="flex h-9 w-9 items-center justify-center rounded-full bg-white shadow-sm shadow-midnight/10">
+                <svg aria-hidden="true" viewBox="0 0 20 20" className="h-4 w-4 text-midnight/70">
+                  <path
+                    fill="currentColor"
+                    d="M4.5 6.5h9.19l-1.72-1.72a.75.75 0 0 1 1.06-1.06l3 3a.75.75 0 0 1 0 1.06l-3 3a.75.75 0 1 1-1.06-1.06l1.72-1.72H4.5a.75.75 0 0 1 0-1.5Zm11 7h-9.19l1.72 1.72a.75.75 0 1 1-1.06 1.06l-3-3a.75.75 0 0 1 0-1.06l3-3a.75.75 0 1 1 1.06 1.06L6.31 12H15.5a.75.75 0 0 1 0 1.5Z"
                   />
-                  <div className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2">
-                    <CurrencyBadge code={meta.needCurrency} />
-                  </div>
-                </div>
+                </svg>
               </div>
-
-              <div className="flex items-center gap-3 rounded-xl border border-midnight/10 bg-midnight/5 px-3 py-2 text-sm font-semibold text-midnight/70">
-                <div className="flex h-9 w-9 items-center justify-center rounded-full bg-white shadow-sm shadow-midnight/10">
-                  <svg aria-hidden="true" viewBox="0 0 20 20" className="h-4 w-4 text-midnight/70">
-                    <path
-                      fill="currentColor"
-                      d="M4.5 6.5h9.19l-1.72-1.72a.75.75 0 0 1 1.06-1.06l3 3a.75.75 0 0 1 0 1.06l-3 3a.75.75 0 1 1-1.06-1.06l1.72-1.72H4.5a.75.75 0 0 1 0-1.5Zm11 7h-9.19l1.72 1.72a.75.75 0 1 1-1.06 1.06l-3-3a.75.75 0 0 1 0-1.06l3-3a.75.75 0 1 1 1.06 1.06L6.31 12H15.5a.75.75 0 0 1 0 1.5Z"
-                    />
-                  </svg>
-                </div>
-                <div className="flex flex-col">
-                  <span className="text-[11px] uppercase tracking-widest text-midnight/50">{rateLabel}</span>
-                  <span className="text-sm font-semibold text-midnight">{`${meta.rate} XAF = 1 USD`}</span>
-                </div>
+              <div className="flex flex-col">
+                <span className="text-[11px] uppercase tracking-widest text-midnight/50">{rateLabel}</span>
+                <span className="text-sm font-semibold text-midnight">{`${meta.rate} XAF = 1 USD`}</span>
               </div>
+            </div>
 
-              <div>
-                <label className="label">{secondaryLabel}</label>
-                <div className="flex items-center gap-3">
-                  <div className="relative w-full">
-                    <input
-                      type="text"
-                      value={secondaryAmount}
-                      readOnly
-                      placeholder="Calculated amount"
-                      className="input bg-midnight/5 pr-24 text-midnight/80"
-                    />
-                    <div className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2">
-                      <CurrencyBadge code={secondaryCurrency} />
-                    </div>
-                  </div>
+            <div className="flex flex-col gap-2">
+              <label className="label">{secondaryLabel}</label>
+              <div className="relative w-full">
+                <input
+                  type="text"
+                  value={secondaryAmount}
+                  readOnly
+                  placeholder="Calculated amount"
+                  className="input bg-midnight/5 pr-24 text-midnight/80"
+                />
+                <div className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2">
+                  <CurrencyBadge code={secondaryCurrency} />
                 </div>
               </div>
             </div>
-          )}
-        </div>
+          </div>
+        )}
+
+        {activeField === 'have' && (
+          <div className="flex flex-col gap-4">
+            <div className="flex flex-col gap-2">
+              <label className="label">Amount you have</label>
+              <div className="relative w-full">
+                <input
+                  type="number"
+                  min="0"
+                  value={haveAmount}
+                  onChange={(e) => setHaveAmount(e.target.value)}
+                  placeholder="Amount"
+                  className="input pr-24"
+                />
+                <div className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2">
+                  <CurrencyBadge code={meta.haveCurrency} />
+                </div>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-3 rounded-xl border border-midnight/10 bg-midnight/5 px-3 py-2 text-sm font-semibold text-midnight/70">
+              <div className="flex h-9 w-9 items-center justify-center rounded-full bg-white shadow-sm shadow-midnight/10">
+                <svg aria-hidden="true" viewBox="0 0 20 20" className="h-4 w-4 text-midnight/70">
+                  <path
+                    fill="currentColor"
+                    d="M4.5 6.5h9.19l-1.72-1.72a.75.75 0 0 1 1.06-1.06l3 3a.75.75 0 0 1 0 1.06l-3 3a.75.75 0 1 1-1.06-1.06l1.72-1.72H4.5a.75.75 0 0 1 0-1.5Zm11 7h-9.19l1.72 1.72a.75.75 0 1 1-1.06 1.06l-3-3a.75.75 0 0 1 0-1.06l3-3a.75.75 0 1 1 1.06 1.06L6.31 12H15.5a.75.75 0 0 1 0 1.5Z"
+                  />
+                </svg>
+              </div>
+              <div className="flex flex-col">
+                <span className="text-[11px] uppercase tracking-widest text-midnight/50">{rateLabel}</span>
+                <span className="text-sm font-semibold text-midnight">{`${meta.rate} XAF = 1 USD`}</span>
+              </div>
+            </div>
+
+            <div className="flex flex-col gap-2">
+              <label className="label">{secondaryLabel}</label>
+              <div className="relative w-full">
+                <input
+                  type="text"
+                  value={secondaryAmount}
+                  readOnly
+                  placeholder="Calculated amount"
+                  className="input bg-midnight/5 pr-24 text-midnight/80"
+                />
+                <div className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2">
+                  <CurrencyBadge code={secondaryCurrency} />
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
 
         <div>
           <label className="label">Desired rate (optional)</label>

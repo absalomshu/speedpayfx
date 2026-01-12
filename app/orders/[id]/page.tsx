@@ -26,13 +26,13 @@ export default async function OrderDetailPage({ params }: { params: Promise<{ id
 
   return (
     <main className="mx-auto flex max-w-xl flex-col gap-5 px-5 py-8">
-      <div className="flex items-center gap-2 text-sm text-midnight/70">
-        <Link href="/orders" className="font-semibold text-midnight">Back</Link>
-        <span className="text-midnight/40">/</span>
-        <span>Order {order.id.slice(0, 6)}...</span>
-      </div>
-
       <div className="card flex flex-col gap-4 p-6">
+        <div className="rounded-xl border border-midnight/10 bg-midnight/5 px-4 py-3">
+          <p className="text-sm font-semibold text-midnight">Your order has been created</p>
+          <p className="text-xs uppercase tracking-wide text-midnight/60">Order ID</p>
+          <p className="text-sm font-semibold text-midnight/80">{order.id}</p>
+        </div>
+
         <div className="flex items-center justify-between">
           <div className="flex flex-col">
             <p className="text-xs font-semibold uppercase tracking-wide text-midnight/60">Partner has</p>

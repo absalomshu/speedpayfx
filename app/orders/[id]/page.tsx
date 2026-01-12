@@ -11,7 +11,7 @@ type CurrencyCode = 'USD' | 'XAF';
 function FlagIcon({ code }: { code: CurrencyCode }) {
   const isUsd = code === 'USD';
   return (
-    <span className="flex h-5 w-5 items-center justify-center overflow-hidden rounded-sm bg-white shadow-sm shadow-midnight/10">
+    <span className="flex h-5 w-5 items-center justify-center overflow-hidden rounded-sm bg-white">
       {isUsd ? (
         <svg aria-hidden="true" viewBox="0 0 24 16" className="h-3 w-4">
           <rect width="24" height="16" fill="#ffffff" />

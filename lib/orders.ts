@@ -1,4 +1,3 @@
-import { v4 as uuid } from 'uuid';
 import { getStorage } from './storage';
 import type { Order, Rates } from './types';
 
@@ -46,9 +45,28 @@ async function saveOrderIndex(ids: string[]) {
   await kv.put(ORDERS_INDEX_KEY, JSON.stringify(ids));
 }
 
+function createOrderIdCandidate() {
+  if (globalThis.crypto?.getRandomValues) {
+    const buffer = new Uint32Array(1);
+    globalThis.crypto.getRandomValues(buffer);
+    return String((buffer[0] % 900000) + 100000);
+  }
+  return String(Math.floor(Math.random() * 900000) + 100000);
+}
+
+async function generateOrderId() {
+  const kv = await getStorage();
+  for (let attempt = 0; attempt < 10; attempt += 1) {
+    const id = createOrderIdCandidate();
+    const existing = await kv.get(`order:${id}`);
+    if (!existing) return id;
+  }
+  throw new Error('Unable to generate unique order ID.');
+}
+
 export async function createOrder(order: Omit<Order, 'id' | 'created_at' | 'status'>) {
   const kv = await getStorage();
-  const id = uuid();
+  const id = await generateOrderId();
   const created_at = new Date().toISOString();
   const record: Order = { ...order, id, created_at, status: 'OPEN' };
   await kv.put(`order:${id}`, JSON.stringify(record));

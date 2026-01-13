@@ -9,10 +9,7 @@ const DEFAULT_RATE_CONFIG: RateConfig = {
   interval_minutes: 120,
   offset_xaf: 2,
   last_checked_at: null,
-  usd_to_xaf_mode: 'auto',
-  usd_to_xaf_manual: null,
-  xaf_to_usd_mode: 'auto',
-  xaf_to_usd_manual: null,
+  spread_xaf: 15,
 };
 
 type NalaRates = {
@@ -39,28 +36,14 @@ const normalizeRateConfig = (value?: Partial<RateConfig> | null): RateConfig => 
     ? Math.max(0, Math.round(value?.offset_xaf ?? DEFAULT_RATE_CONFIG.offset_xaf))
     : DEFAULT_RATE_CONFIG.offset_xaf;
   const lastCheckedAt = typeof value?.last_checked_at === 'string' ? value.last_checked_at : null;
-  const usdMode = value?.usd_to_xaf_mode === 'manual' ? 'manual' : 'auto';
-  const xafMode = value?.xaf_to_usd_mode === 'manual' ? 'manual' : 'auto';
-  const usdManual =
-    typeof value?.usd_to_xaf_manual === 'number' &&
-    Number.isFinite(value.usd_to_xaf_manual) &&
-    value.usd_to_xaf_manual > 0
-      ? value.usd_to_xaf_manual
-      : null;
-  const xafManual =
-    typeof value?.xaf_to_usd_manual === 'number' &&
-    Number.isFinite(value.xaf_to_usd_manual) &&
-    value.xaf_to_usd_manual > 0
-      ? value.xaf_to_usd_manual
-      : null;
+  const spreadXaf = Number.isFinite(value?.spread_xaf)
+    ? Math.max(0, Math.round(value?.spread_xaf ?? DEFAULT_RATE_CONFIG.spread_xaf))
+    : DEFAULT_RATE_CONFIG.spread_xaf;
   return {
     interval_minutes: intervalMinutes,
     offset_xaf: offsetXaf,
     last_checked_at: lastCheckedAt,
-    usd_to_xaf_mode: usdMode,
-    usd_to_xaf_manual: usdManual,
-    xaf_to_usd_mode: xafMode,
-    xaf_to_usd_manual: xafManual,
+    spread_xaf: spreadXaf,
   };
 };
 
@@ -167,41 +150,21 @@ export async function maybeRefreshRates(options?: { force?: boolean }) {
   const due =
     force || now.getTime() - lastCheckedAt.getTime() >= config.interval_minutes * 60 * 1000;
 
-  const useUsdManual =
-    config.usd_to_xaf_mode === 'manual' && typeof config.usd_to_xaf_manual === 'number';
-  const useXafManual =
-    config.xaf_to_usd_mode === 'manual' && typeof config.xaf_to_usd_manual === 'number';
-
   let nalaRates: NalaRates | null = null;
-  if (due && (!useUsdManual || !useXafManual)) {
+  if (due) {
     nalaRates = await fetchNalaRates();
   }
   const offset = config.offset_xaf;
 
-  let autoUsdToXaf = rates.usd_to_xaf;
-  let autoXafToUsd = rates.xaf_to_usd;
-
+  let nextUsdToXaf = rates.usd_to_xaf;
   if (nalaRates) {
-    const baseUsdRate = useUsdManual && !useXafManual ? rates.xaf_to_usd : rates.usd_to_xaf;
-    const nextUsdCandidate =
-      Math.abs(nalaRates.usd_to_xaf - baseUsdRate) >= offset ? nalaRates.usd_to_xaf : baseUsdRate;
-    if (!useUsdManual) {
-      autoUsdToXaf = nextUsdCandidate;
-    }
-    if (!useXafManual) {
-      if (nalaRates.has_direct_xaf_to_usd) {
-        autoXafToUsd =
-          Math.abs(nalaRates.xaf_to_usd - rates.xaf_to_usd) >= offset
-            ? nalaRates.xaf_to_usd
-            : rates.xaf_to_usd;
-      } else {
-        autoXafToUsd = nextUsdCandidate;
-      }
-    }
+    nextUsdToXaf =
+      Math.abs(nalaRates.usd_to_xaf - rates.usd_to_xaf) >= offset
+        ? nalaRates.usd_to_xaf
+        : rates.usd_to_xaf;
   }
 
-  const nextUsdToXaf = useUsdManual ? (config.usd_to_xaf_manual as number) : autoUsdToXaf;
-  const nextXafToUsd = useXafManual ? (config.xaf_to_usd_manual as number) : autoXafToUsd;
+  const nextXafToUsd = nextUsdToXaf + config.spread_xaf;
 
   let updatedRates: Rates = rates;
   if (nextUsdToXaf !== rates.usd_to_xaf || nextXafToUsd !== rates.xaf_to_usd) {

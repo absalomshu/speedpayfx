@@ -10,10 +10,7 @@ export type RateConfig = {
   interval_minutes: number;
   offset_xaf: number;
   last_checked_at: string | null;
-  usd_to_xaf_mode: RateMode;
-  usd_to_xaf_manual: number | null;
-  xaf_to_usd_mode: RateMode;
-  xaf_to_usd_manual: number | null;
+  spread_xaf: number;
 };
 
 export type OrderDirection = 'WANT_USD' | 'WANT_XAF';

@@ -1,11 +1,19 @@
 import { readRates } from '../../../../../lib/orders';
-import { readNalaRates, readRateConfig, writeRateConfig } from '../../../../../lib/rate-updater';
+import { maybeRefreshRates, readNalaRates, readRateConfig, writeRateConfig } from '../../../../../lib/rate-updater';
 import type { RateConfig } from '../../../../../lib/types';
 
 export const runtime = 'edge';
 
 export async function GET(req: Request) {
-  const [config, rates] = await Promise.all([readRateConfig(), readRates()]);
+  let config = await readRateConfig();
+  let rates = await readRates();
+  try {
+    const refreshed = await maybeRefreshRates();
+    config = refreshed.config;
+    rates = refreshed.rates;
+  } catch {
+    // Fall back to stored values when rate refresh fails.
+  }
   let nalaRates = null;
   let nalaError: string | null = null;
   try {

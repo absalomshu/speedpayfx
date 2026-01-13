@@ -8,6 +8,8 @@ export const runtime = 'edge';
 
 type CurrencyCode = 'USD' | 'XAF';
 
+const formatRate = (value: number) => (Number.isFinite(value) ? value.toFixed(2) : '—');
+
 function FlagIcon({ code }: { code: CurrencyCode }) {
   const isUsd = code === 'USD';
   return (
@@ -70,30 +72,30 @@ export default async function HomePage() {
           <div className="flex flex-col gap-1 rounded-xl bg-midnight/5 px-4 py-3 shadow-inner shadow-midnight/5">
             <p className="flex items-center gap-2 text-sm font-semibold uppercase tracking-wide text-midnight/60">
               <span className="inline-flex items-center gap-1.5">
-                <FlagIcon code="USD" />
-                <span>USD</span>
-              </span>
-              <ExchangeIcon />
-              <span className="inline-flex items-center gap-1.5">
                 <FlagIcon code="XAF" />
                 <span>XAF</span>
               </span>
+              <ExchangeIcon />
+              <span className="inline-flex items-center gap-1.5">
+                <FlagIcon code="USD" />
+                <span>USD</span>
+              </span>
             </p>
-            <p className="text-2xl font-black text-midnight">1 USD = {rates.usd_to_xaf} XAF</p>
+            <p className="text-2xl font-black text-midnight">{formatRate(rates.xaf_to_usd)} XAF = 1 USD </p>
           </div>
           <div className="flex flex-col gap-1 rounded-xl bg-midnight/5 px-4 py-3 shadow-inner shadow-midnight/5">
             <p className="flex items-center gap-2 text-sm font-semibold uppercase tracking-wide text-midnight/60">
               <span className="inline-flex items-center gap-1.5">
-                <FlagIcon code="XAF" />
-                <span>XAF</span>
-              </span>
-              <ExchangeIcon />
-              <span className="inline-flex items-center gap-1.5">
                 <FlagIcon code="USD" />
                 <span>USD</span>
               </span>
+              <ExchangeIcon />
+              <span className="inline-flex items-center gap-1.5">
+                <FlagIcon code="XAF" />
+                <span>XAF</span>
+              </span>
             </p>
-            <p className="text-2xl font-black text-midnight">{rates.xaf_to_usd} XAF = 1 USD </p>
+            <p className="text-2xl font-black text-midnight">1 USD = {formatRate(rates.usd_to_xaf)} XAF</p>
           </div>
         </div>
         <p className="mt-3 text-xs font-medium uppercase tracking-wide text-midnight/60">

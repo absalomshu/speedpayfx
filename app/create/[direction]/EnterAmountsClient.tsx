@@ -13,6 +13,8 @@ const initialRates: Rates = {
   updated_at: new Date().toISOString(),
 };
 
+const formatRate = (value: number) => (Number.isFinite(value) ? value.toFixed(2) : '—');
+
 type Props = {
   direction: 'want-usd' | 'want-xaf';
 };
@@ -62,9 +64,11 @@ export default function EnterAmountsClient({ direction }: Props) {
 
   const meta = useMemo(() => {
     const desired = Number(desiredRate);
-    const hasCustomRate = desiredRate.trim().length > 0 && Number.isFinite(desired) && desired > 0;
-    const fallbackRate = direction === 'want-usd' ? rates.xaf_to_usd : rates.usd_to_xaf;
-    const rate = hasCustomRate ? desired : fallbackRate;
+    const normalizedDesired = Number.isFinite(desired) ? Number(desired.toFixed(2)) : desired;
+    const hasCustomRate =
+      desiredRate.trim().length > 0 && Number.isFinite(normalizedDesired) && normalizedDesired > 0;
+    const fallbackRate = rates.xaf_to_usd;
+    const rate = hasCustomRate ? normalizedDesired : fallbackRate;
 
     if (direction === 'want-usd') {
       return {
@@ -86,7 +90,7 @@ export default function EnterAmountsClient({ direction }: Props) {
     };
   }, [direction, desiredRate, rates]);
 
-  const rateLabel = meta.hasCustomRate ? 'Requested rate' : 'Live rate';
+  const rateLabel = meta.hasCustomRate ? 'Requested rate' : 'Speedpay rate';
   const secondaryLabel = activeField === 'need' ? 'You will pay' : 'You will receive';
   const secondaryCurrency = activeField === 'need' ? meta.haveCurrency : meta.needCurrency;
 
@@ -147,14 +151,18 @@ export default function EnterAmountsClient({ direction }: Props) {
       return;
     }
 
+    const desiredValue = Number(desiredRate);
+    const desiredRateValue =
+      desiredRate.trim().length > 0 && Number.isFinite(desiredValue) ? Number(desiredValue.toFixed(2)) : null;
+
     setSubmitting(true);
     const payload = {
       direction: meta.direction,
       partner_has_amount: result.haveAmount,
       partner_has_currency: meta.haveCurrency,
       partner_wants_currency: meta.needCurrency,
-      desired_rate_xaf_per_usd: desiredRate ? Number(desiredRate) : null,
-      rate_display: `Rate: ${meta.rate} XAF = 1 USD`,
+      desired_rate_xaf_per_usd: desiredRateValue,
+      rate_display: `${rateLabel}: ${formatRate(meta.rate)} XAF = 1 USD`,
       you_will_pay_amount: result.needAmount,
       you_will_pay_currency: meta.needCurrency,
       you_will_receive_amount: result.haveAmount,
@@ -243,7 +251,7 @@ export default function EnterAmountsClient({ direction }: Props) {
               </div>
               <div className="flex flex-col">
                 <span className="text-[11px] uppercase tracking-widest text-midnight/50">{rateLabel}</span>
-                <span className="text-sm font-semibold text-midnight">{`${meta.rate} XAF = 1 USD`}</span>
+                <span className="text-sm font-semibold text-midnight">{`${formatRate(meta.rate)} XAF = 1 USD`}</span>
               </div>
             </div>
 
@@ -295,7 +303,7 @@ export default function EnterAmountsClient({ direction }: Props) {
               </div>
               <div className="flex flex-col">
                 <span className="text-[11px] uppercase tracking-widest text-midnight/50">{rateLabel}</span>
-                <span className="text-sm font-semibold text-midnight">{`${meta.rate} XAF = 1 USD`}</span>
+                <span className="text-sm font-semibold text-midnight">{`${formatRate(meta.rate)} XAF = 1 USD`}</span>
               </div>
             </div>
 
@@ -324,9 +332,10 @@ export default function EnterAmountsClient({ direction }: Props) {
             <input
               type="number"
               min="0"
+              step="0.01"
               value={desiredRate}
               onChange={(e) => setDesiredRate(e.target.value)}
-              placeholder={`${meta.rate}`}
+              placeholder={`${formatRate(meta.rate)}`}
               className="input max-w-[200px]"
             />
             <span className="text-sm font-semibold text-midnight/70">XAF per 1 USD</span>

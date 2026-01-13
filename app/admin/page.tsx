@@ -27,6 +27,9 @@ type ConfigResponse = {
   nala_error: string | null;
 };
 
+const formatRate = (value: number | null) =>
+  typeof value === 'number' && Number.isFinite(value) ? value.toFixed(2) : '—';
+
 const formatTime = (value: string | null) => {
   if (!value) return 'Never';
   return new Date(value).toLocaleString('en-US', {
@@ -142,7 +145,7 @@ export default function AdminPage() {
               <div className="rounded-xl border border-midnight/10 bg-white px-4 py-3">
                 <p className="text-xs uppercase tracking-widest text-midnight/50">USD → XAF</p>
                 <p className="text-lg font-semibold text-midnight">
-                  {nalaUsdToXaf ?? '—'} XAF
+                  {formatRate(nalaUsdToXaf)} XAF
                 </p>
               </div>
             </div>
@@ -185,10 +188,10 @@ export default function AdminPage() {
               placeholder="Enter spread amount"
             />
             <p className="mt-2 text-sm font-semibold text-midnight/70">
-              Local USD → XAF: {currentUsdToXaf ?? '—'} XAF
+              Local USD → XAF: {formatRate(currentUsdToXaf)} XAF
             </p>
             <p className="text-sm font-semibold text-midnight/70">
-              Local XAF → USD: {currentXafToUsd ?? '—'} XAF
+              Local XAF → USD: {formatRate(currentXafToUsd)} XAF
             </p>
           </div>
         </div>

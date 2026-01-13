@@ -47,6 +47,8 @@ const normalizeRateConfig = (value?: Partial<RateConfig> | null): RateConfig => 
   };
 };
 
+const roundRate = (value: number) => Math.round(value * 100) / 100;
+
 export async function readRateConfig(): Promise<RateConfig> {
   const kv = await getStorage();
   const raw = await kv.get(RATE_CONFIG_KEY);
@@ -147,30 +149,30 @@ export async function maybeRefreshRates(options?: { force?: boolean }) {
 
   const lastCheckedAt = config.last_checked_at ? new Date(config.last_checked_at) : new Date(0);
   const now = new Date();
+  const needsPrecisionSync =
+    Number.isFinite(rates.usd_to_xaf) && Math.abs(rates.usd_to_xaf % 1) < Number.EPSILON;
   const due =
-    force || now.getTime() - lastCheckedAt.getTime() >= config.interval_minutes * 60 * 1000;
+    force ||
+    needsPrecisionSync ||
+    now.getTime() - lastCheckedAt.getTime() >= config.interval_minutes * 60 * 1000;
 
   let nalaRates: NalaRates | null = null;
   if (due) {
     nalaRates = await fetchNalaRates();
   }
-  const offset = config.offset_xaf;
-
   let nextUsdToXaf = rates.usd_to_xaf;
   if (nalaRates) {
-    nextUsdToXaf =
-      Math.abs(nalaRates.usd_to_xaf - rates.usd_to_xaf) >= offset
-        ? nalaRates.usd_to_xaf
-        : rates.usd_to_xaf;
+    nextUsdToXaf = roundRate(nalaRates.usd_to_xaf);
   }
 
   const nextXafToUsd = nextUsdToXaf + config.spread_xaf;
+  const roundedXafToUsd = roundRate(nextXafToUsd);
 
   let updatedRates: Rates = rates;
-  if (nextUsdToXaf !== rates.usd_to_xaf || nextXafToUsd !== rates.xaf_to_usd) {
+  if (nextUsdToXaf !== rates.usd_to_xaf || roundedXafToUsd !== rates.xaf_to_usd) {
     updatedRates = await writeRates({
       usd_to_xaf: nextUsdToXaf,
-      xaf_to_usd: nextXafToUsd,
+      xaf_to_usd: roundedXafToUsd,
       updated_at: new Date().toISOString(),
     });
   }

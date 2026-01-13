@@ -14,6 +14,20 @@ const initialRates: Rates = {
 };
 
 const formatRate = (value: number) => (Number.isFinite(value) ? value.toFixed(2) : '—');
+const stripFormatting = (value: string) => value.replace(/,/g, '');
+const formatAmount = (value: number, currency: CurrencyBadgeProps['code']) => {
+  if (!Number.isFinite(value)) return '';
+  const fraction = currency === 'USD' ? 2 : 0;
+  return new Intl.NumberFormat('en-US', {
+    minimumFractionDigits: fraction,
+    maximumFractionDigits: fraction,
+  }).format(value);
+};
+const parseAmount = (value: string) => {
+  const normalized = stripFormatting(value).trim();
+  if (!normalized) return NaN;
+  return Number(normalized);
+};
 
 type Props = {
   direction: 'want-usd' | 'want-xaf';
@@ -99,17 +113,17 @@ export default function EnterAmountsClient({ direction }: Props) {
     if (!Number.isFinite(rate) || rate <= 0) return '';
 
     if (activeField === 'need') {
-      const need = Number(needAmount);
+      const need = parseAmount(needAmount);
       if (!(need > 0)) return '';
       const value = meta.direction === 'WANT_USD' ? need * rate : need / rate;
-      return value.toFixed(2);
+      return formatAmount(value, secondaryCurrency);
     }
 
-    const have = Number(haveAmount);
+    const have = parseAmount(haveAmount);
     if (!(have > 0)) return '';
     const value = meta.direction === 'WANT_USD' ? have / rate : have * rate;
-    return value.toFixed(2);
-  }, [activeField, haveAmount, needAmount, meta.direction, meta.rate]);
+    return formatAmount(value, secondaryCurrency);
+  }, [activeField, haveAmount, needAmount, meta.direction, meta.rate, secondaryCurrency]);
 
   useEffect(() => {
     fetch('/api/rates')
@@ -121,8 +135,8 @@ export default function EnterAmountsClient({ direction }: Props) {
 
   const computeAmounts = () => {
     const rate = meta.rate;
-    const have = Number(haveAmount);
-    const need = Number(needAmount);
+    const have = parseAmount(haveAmount);
+    const need = parseAmount(needAmount);
 
     if (!Number.isFinite(rate) || rate <= 0) {
       return { error: 'Rate is invalid' };
@@ -227,10 +241,18 @@ export default function EnterAmountsClient({ direction }: Props) {
               <label className="label">Amount needed</label>
               <div className="relative w-full">
                 <input
-                  type="number"
+                  type="text"
+                  inputMode="decimal"
                   min="0"
                   value={needAmount}
-                  onChange={(e) => setNeedAmount(e.target.value)}
+                  onChange={(e) => setNeedAmount(e.target.value.replace(/[^\d.,]/g, ''))}
+                  onBlur={() => {
+                    const amount = parseAmount(needAmount);
+                    if (Number.isFinite(amount)) {
+                      setNeedAmount(formatAmount(amount, meta.needCurrency));
+                    }
+                  }}
+                  onFocus={() => setNeedAmount(stripFormatting(needAmount))}
                   placeholder="Amount"
                   className="input pr-24"
                 />
@@ -279,10 +301,18 @@ export default function EnterAmountsClient({ direction }: Props) {
               <label className="label">Amount you have</label>
               <div className="relative w-full">
                 <input
-                  type="number"
+                  type="text"
+                  inputMode="decimal"
                   min="0"
                   value={haveAmount}
-                  onChange={(e) => setHaveAmount(e.target.value)}
+                  onChange={(e) => setHaveAmount(e.target.value.replace(/[^\d.,]/g, ''))}
+                  onBlur={() => {
+                    const amount = parseAmount(haveAmount);
+                    if (Number.isFinite(amount)) {
+                      setHaveAmount(formatAmount(amount, meta.haveCurrency));
+                    }
+                  }}
+                  onFocus={() => setHaveAmount(stripFormatting(haveAmount))}
                   placeholder="Amount"
                   className="input pr-24"
                 />
